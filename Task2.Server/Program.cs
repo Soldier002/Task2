@@ -1,5 +1,8 @@
+using FluentMigrator.Runner;
+using Persistence.Migrations;
 using Polly;
 using Quartz;
+using System.Reflection;
 using Task2.Server.Jobs;
 
 
@@ -17,6 +20,7 @@ builder.Services.AddHttpClient("WeatherApi")
         policyBuilder.WaitAndRetryAsync(3, retryNumber => TimeSpan.FromMilliseconds(1000)));
 builder.Services.AddSingleton<GetWeatherDataJob>();
 
+
 builder.Services.AddQuartz(q =>
 {
     var jobKey = new JobKey("GetWeatherDataJob");
@@ -29,6 +33,17 @@ builder.Services.AddQuartz(q =>
     );
 });
 builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+
+var configuration = new ConfigurationBuilder()
+    .AddUserSecrets(Assembly.GetExecutingAssembly())
+    .Build();
+var tmp = configuration.GetConnectionString("DefaultConnectionString");
+
+builder.Services.AddFluentMigratorCore()
+    .ConfigureRunner(rb => rb
+        .AddSqlServer()
+        .WithGlobalConnectionString(tmp)
+        .ScanIn(typeof(_202409102330_AddCityAndWeatherTables).Assembly).For.Migrations());
 
 var app = builder.Build();
 
@@ -55,5 +70,11 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapFallbackToFile("/index.html");
+
+using (var scope = app.Services.CreateScope())
+{
+    var runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+    runner.MigrateUp();
+}
 
 app.Run();
