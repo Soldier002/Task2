@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using System.IO.Pipelines;
 using System.Net.Http;
 using System.Text.Json.Serialization;
@@ -66,6 +67,8 @@ namespace Task2.Server.Controllers
 
         public class WeatherListViewModel
         {
+            public DateTime UtcNow { get; set; }
+
             public IList<WeatherViewModel> WeatherList { get; set; } = new List<WeatherViewModel>();
         }
 
@@ -75,9 +78,9 @@ namespace Task2.Server.Controllers
 
             public string City { get; set; }
 
-            public double TempMin { get; set; }
+            public double MinTemp { get; set; }
 
-            public double TempMax { get; set; }
+            public double MaxTemp { get; set; }
         }
 
 
@@ -93,7 +96,7 @@ namespace Task2.Server.Controllers
                 var result = await _httpClient.GetAsync("https://api.openweathermap.org/data/2.5/group?id=2643743,3333169,6167865,6094817,361058,360630&appid=faa625de9ce05a0abdf9cf5850ca5637&units=metric");
 
                 var result2 = JsonConvert.DeserializeObject<Root>(await result.Content.ReadAsStringAsync());
-
+                var rnd = new Random();
                 var weatherListViewModel = new WeatherListViewModel();
                 foreach (var w in result2.list)
                 {
@@ -101,20 +104,20 @@ namespace Task2.Server.Controllers
                     {
                         Country = w.sys.country,
                         City = w.name,
-                        TempMin = w.main.temp_min,
-                        TempMax = w.main.temp_max,
+                        MinTemp = rnd.NextInt64() % 20 + 10,//w.main.temp_min,
+                        MaxTemp = w.main.temp_max,
                     };
 
                     weatherListViewModel.WeatherList.Add(wvm);
                 }
 
-
-
-                await Response.WriteAsync(JsonConvert.SerializeObject(weatherListViewModel));
+                weatherListViewModel.UtcNow = DateTime.UtcNow;
+                var camelSettings = new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() };
+                await Response.WriteAsync("data: " + JsonConvert.SerializeObject(weatherListViewModel, camelSettings) + "\n\n");
                 //Response.BodyWriter.AsStream();
                 //await Response.WriteAsync(result.Content.ReadAsStream());
                 await Response.Body.FlushAsync();
-                await Task.Delay(1000);
+                await Task.Delay(5000);
             }
         }
     }
