@@ -1,4 +1,6 @@
 using Polly;
+using Quartz;
+using Task2.Server.Jobs;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +15,20 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient("WeatherApi")
     .AddTransientHttpErrorPolicy(policyBuilder =>
         policyBuilder.WaitAndRetryAsync(3, retryNumber => TimeSpan.FromMilliseconds(1000)));
+builder.Services.AddSingleton<GetWeatherDataJob>();
+
+builder.Services.AddQuartz(q =>
+{
+    var jobKey = new JobKey("GetWeatherDataJob");
+    q.AddJob<GetWeatherDataJob>(opts => opts.WithIdentity(jobKey));
+
+    q.AddTrigger(opts => opts
+        .ForJob(jobKey)
+        .WithIdentity("GetWeatherDataJob-trigger")
+        .WithCronSchedule("0/5 * * ? * * *")
+    );
+});
+builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
 var app = builder.Build();
 
