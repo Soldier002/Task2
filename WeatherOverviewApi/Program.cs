@@ -17,7 +17,7 @@ using Quartz;
 using Services.Mappers;
 using Services.Services;
 using System.Reflection;
-using Task2.Server.Jobs;
+using WeatherOverviewApi.Jobs;
 
 
 var builder = WebApplication.CreateBuilder(args);

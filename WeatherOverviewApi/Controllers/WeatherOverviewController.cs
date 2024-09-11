@@ -1,17 +1,10 @@
 using Domain.Persistence.Entities;
 using Domain.Persistence.Repositories;
 using Domain.Services.Services;
-using Domain.WeatherOverviewApi.ViewModels;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-using Persistence.Repositories;
-using System.IO.Pipelines;
-using System.Net.Http;
-using System.Text.Json.Serialization;
 
-namespace Task2.Server.Controllers
+namespace WeatherOverviewApi.Controllers
 {
     [ApiController]
     [Route("[controller]")]

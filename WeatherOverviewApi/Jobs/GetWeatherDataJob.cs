@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 using Quartz;
 using Services.Services;
 
-namespace Task2.Server.Jobs
+namespace WeatherOverviewApi.Jobs
 {
     [PersistJobDataAfterExecution]
     [DisallowConcurrentExecution]
