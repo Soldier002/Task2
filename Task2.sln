@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35222.181
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Task2.Server", "Task2.Server\Task2.Server.csproj", "{484D2CA4-D097-4367-8F36-8C53D0A77F09}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WeatherOverviewApi", "WeatherOverviewApi\WeatherOverviewApi.csproj", "{484D2CA4-D097-4367-8F36-8C53D0A77F09}"
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "Frontend", "task2.client\Frontend.esproj", "{072BB9F0-7217-4677-AF22-DD314B253C67}"
 EndProject
@@ -11,11 +11,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Persistence", "Persistence\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Domain", "Domain\Domain.csproj", "{4D5D38ED-F76E-4A71-B3FB-ABFD4ECC9EF6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services", "Services\Services.csproj", "{84A472AD-8C31-40CD-9EB8-E65B52E9D2D0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Services", "Services\Services.csproj", "{84A472AD-8C31-40CD-9EB8-E65B52E9D2D0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Integration", "Integration\Integration.csproj", "{42A4E377-0DDD-439B-807E-319DAB8E98E9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Integration", "Integration\Integration.csproj", "{42A4E377-0DDD-439B-807E-319DAB8E98E9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{2CDAD1F7-6BBD-423A-B272-D2F78DED53B2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csproj", "{2CDAD1F7-6BBD-423A-B272-D2F78DED53B2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
