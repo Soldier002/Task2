@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Domain.Common.Configuration;
 using Domain.Persistence.Entities;
 using Domain.Persistence.Repositories;
 using Microsoft.Data.SqlClient;
@@ -9,9 +10,9 @@ namespace Persistence.Repositories
 {
     public class WeatherReportRepository : IWeatherReportRepository
     {
-        private readonly IConfiguration _configuration;
+        private readonly IWeatherOverviewConfiguration _configuration;
 
-        public WeatherReportRepository(IConfiguration configuration)
+        public WeatherReportRepository(IWeatherOverviewConfiguration configuration)
         {
             _configuration = configuration;
         }
@@ -27,7 +28,7 @@ namespace Persistence.Repositories
 					FROM WeatherReportBatches wrb
 					ORDER BY wrb.Id DESC)";
 
-            using var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnectionString"));
+            using var connection = new SqlConnection(_configuration.DefaultConnectionString);
             var result = await connection.QueryAsync<WeatherReport, WeatherReportBatch, WeatherReport>(
                 sql,
                 map: (weatherReport, weatherReportBatch) =>
@@ -44,7 +45,7 @@ namespace Persistence.Repositories
         {
             var dataTable = MapFrom(weatherReports);
 
-            using var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnectionString"));
+            using var connection = new SqlConnection(_configuration.DefaultConnectionString);
             connection.Open();
             using var transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted);
             try

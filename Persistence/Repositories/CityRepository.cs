@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Domain.Common.Configuration;
 using Domain.Persistence.Entities;
 using Domain.Persistence.Repositories;
 using Microsoft.Data.SqlClient;
@@ -8,9 +9,9 @@ namespace Persistence.Repositories
 {
     public class CityRepository : ICityRepository
     {
-        private readonly IConfiguration _configuration;
+        private readonly IWeatherOverviewConfiguration _configuration;
 
-        public CityRepository(IConfiguration configuration)
+        public CityRepository(IWeatherOverviewConfiguration configuration)
         {
             _configuration = configuration;
         }
@@ -25,7 +26,7 @@ namespace Persistence.Repositories
                     INSERT (Id, Name, Country)
                     VALUES (Source.Id, Source.Name, Source.Country);";
 
-            using var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnectionString"));
+            using var connection = new SqlConnection(_configuration.DefaultConnectionString);
             await connection.ExecuteAsync(sql, city);
         }
 
@@ -33,7 +34,7 @@ namespace Persistence.Repositories
         {
             var sql = "SELECT * FROM Cities";
 
-            using (var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnectionString")))
+            using (var connection = new SqlConnection(_configuration.DefaultConnectionString))
             {
                 var cities = await connection.QueryAsync<City>(sql);
                 return cities.ToList();
