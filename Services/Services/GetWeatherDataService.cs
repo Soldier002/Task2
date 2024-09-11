@@ -4,6 +4,7 @@ using Domain.Persistence.Repositories;
 using Domain.Services.Mappers;
 using Domain.Services.Services;
 using Quartz;
+using IWeatherReportMapper = Domain.Persistence.Mappers.IWeatherReportMapper;
 
 namespace Services.Services
 {

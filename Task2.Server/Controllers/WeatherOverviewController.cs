@@ -1,5 +1,6 @@
 using Domain.Persistence.Entities;
 using Domain.Persistence.Repositories;
+using Domain.Services.Services;
 using Domain.WeatherOverviewApi.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -16,17 +17,13 @@ namespace Task2.Server.Controllers
     [Route("[controller]")]
     public class WeatherOverviewController : ControllerBase
     {
-        private readonly ILogger<WeatherOverviewController> _logger;
-        private readonly IWeatherReportRepository _weatherReportRepository;
         private readonly ICityRepository _cityRepository;
-        private readonly HttpClient _httpClient;
+        private readonly IWeatherOverviewService _weatherOverviewService;
 
-        public WeatherOverviewController(ILogger<WeatherOverviewController> logger, IHttpClientFactory httpClientFactory, IWeatherReportRepository weatherReportRepository, ICityRepository cityRepository)
+        public WeatherOverviewController(ICityRepository cityRepository, IWeatherOverviewService weatherOverviewService)
         {
-            _logger = logger;
-            _weatherReportRepository = weatherReportRepository;
             _cityRepository = cityRepository;
-            _httpClient = httpClientFactory.CreateClient("WeatherApi");
+            _weatherOverviewService = weatherOverviewService;
         }
 
         [HttpGet("getAllCities")]
@@ -38,45 +35,19 @@ namespace Task2.Server.Controllers
         }
 
         [HttpGet("weatherReportsSse")]
-        public async Task<string> WeatherReportsSse()
+        public async Task WeatherReportsSse()
         {
             Response.Headers.Add("Content-Type", "text/event-stream");
             Response.Headers.Add("Cache-Control", "no-cache");
             Response.Headers.Add("Connection", "keep-alive");
             while (true)
             {
-                try
-                {
-                    var weatherReports = await _weatherReportRepository.GetAllFromLastBatch();
+                var weatherReportListViewModel = await _weatherOverviewService.ExecuteWeatherReportsSse();
 
-                    var rnd = new Random();
-                    var vm = new WeatherReportListViewModel
-                    {
-                        UtcNow = weatherReports.First().WeatherReportBatch.CreationDateTime.ToString("HH:mm:ss")
-                    };
+                var camelSettings = new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() };
+                await Response.WriteAsync("data: " + JsonConvert.SerializeObject(weatherReportListViewModel, camelSettings) + "\n\n");
+                await Response.Body.FlushAsync();
 
-                    foreach (var weatherReport in weatherReports)
-                    {
-                        var wvm = new WeatherReportViewModel
-                        {
-                            CityId = weatherReport.CityId,
-                            MinTemp = weatherReport.MinTemp,
-                            MaxTemp = weatherReport.MaxTemp
-                        };
-
-                        vm.WeatherList.Add(wvm);
-                    }
-
-                    var camelSettings = new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() };
-                    await Response.WriteAsync("data: " + JsonConvert.SerializeObject(vm, camelSettings) + "\n\n");
-                    //Response.BodyWriter.AsStream();
-                    //await Response.WriteAsync(result.Content.ReadAsStream());
-                    await Response.Body.FlushAsync();
-                }
-                catch (Exception ex)
-                {
-                    var ex2 = ex;
-                }
                 await Task.Delay(5000);
             }
         }

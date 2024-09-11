@@ -34,7 +34,9 @@ builder.Services.AddTransient<IWeatherOverviewConfiguration, WeatherOverviewConf
 builder.Services.AddTransient<IOpenWeatherMapApiClient, OpenWeatherMapApiClient>();
 builder.Services.AddTransient<IOpenWeatherMapApiResponseMapper, OpenWeatherMapApiResponseMapper>();
 builder.Services.AddTransient<IGetWeatherDataService, GetWeatherDataService>();
-builder.Services.AddTransient<IWeatherReportMapper, WeatherReportMapper>();
+builder.Services.AddTransient<Domain.Persistence.Mappers.IWeatherReportMapper, Persistence.Mappers.WeatherReportMapper>();
+builder.Services.AddTransient<Domain.Services.Mappers.IWeatherReportMapper, Services.Mappers.WeatherReportMapper>();
+builder.Services.AddTransient<IWeatherOverviewService, WeatherOverviewService>();
 
 builder.Services.AddQuartz(q =>
 {
