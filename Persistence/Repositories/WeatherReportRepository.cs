@@ -77,7 +77,7 @@ namespace Persistence.Repositories
                 bulkCopy.DestinationTableName = "dbo.WeatherReports";
                 ct.ThrowIfCancellationRequested();
                 await bulkCopy.WriteToServerAsync(weatherReports, ct);
-                await transaction.CommitAsync();
+                await transaction.CommitAsync(ct);
             }
             catch (Exception)
             {
