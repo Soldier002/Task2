@@ -31,12 +31,13 @@ namespace Persistence.Repositories
             await connection.ExecuteAsync(sql, city);
         }
 
-        public async Task<IList<City>> GetAll()
+        public async Task<IList<City>> GetAll(CancellationToken ct)
         {
             var sql = "SELECT * FROM Cities";
 
             using (var connection = new SqlConnection(_configuration.DefaultConnectionString))
             {
+                ct.ThrowIfCancellationRequested();
                 var cities = await connection.QueryAsync<City>(sql);
                 return cities.ToList();
             }

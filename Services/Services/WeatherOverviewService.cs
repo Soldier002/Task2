@@ -16,9 +16,9 @@ namespace Services.Services
             _weatherReportMapper = weatherReportMapper;
         }
 
-        public async Task<WeatherReportListViewModel> ExecuteWeatherReportsSse()
+        public async Task<WeatherReportListViewModel> ExecuteWeatherReportsSse(CancellationToken ct)
         {
-            var weatherReports = await _weatherReportRepository.GetAllFromLastBatch();
+            var weatherReports = await _weatherReportRepository.GetAllFromLastBatch(ct);
             var weatherReportListViewModel = _weatherReportMapper.ToWeatherReportListViewModel(weatherReports);
 
             return weatherReportListViewModel;

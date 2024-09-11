@@ -4,6 +4,6 @@ namespace Domain.Services.Services
 {
     public interface IWeatherOverviewService
     {
-        Task<WeatherReportListViewModel> ExecuteWeatherReportsSse();
+        Task<WeatherReportListViewModel> ExecuteWeatherReportsSse(CancellationToken ct);
     }
 }

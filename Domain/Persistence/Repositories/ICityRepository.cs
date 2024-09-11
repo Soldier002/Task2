@@ -6,6 +6,6 @@ namespace Domain.Persistence.Repositories
     {
         Task InsertIfNotExists(City city, CancellationToken ct);
 
-        Task<IList<City>> GetAll();
+        Task<IList<City>> GetAll(CancellationToken ct);
     }
 }

@@ -18,7 +18,7 @@ namespace Persistence.Repositories
             _configuration = configuration;
         }
 
-        public async Task<IList<WeatherReport>> GetAllFromLastBatch()
+        public async Task<IList<WeatherReport>> GetAllFromLastBatch(CancellationToken ct)
         {
             var sql = @"
 				SELECT * 
@@ -30,6 +30,7 @@ namespace Persistence.Repositories
 					ORDER BY wrb.Id DESC)";
 
             using var connection = new SqlConnection(_configuration.DefaultConnectionString);
+            ct.ThrowIfCancellationRequested();
             var result = await connection.QueryAsync<WeatherReport, WeatherReportBatch, WeatherReport>(
                 sql,
                 map: (weatherReport, weatherReportBatch) =>

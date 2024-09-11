@@ -7,6 +7,8 @@ using Domain.Services.Mappers;
 using Domain.Services.Services;
 using FluentMigrator.Runner;
 using Integration.ApiClients;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Persistence.Mappers;
 using Persistence.Migrations;
 using Persistence.Repositories;
@@ -67,6 +69,11 @@ builder.Services.AddFluentMigratorCore()
         .AddSqlServer()
         .WithGlobalConnectionString(tmp)
         .ScanIn(typeof(_202409102330_AddCityAndWeatherTables).Assembly).For.Migrations());
+
+JsonConvert.DefaultSettings = () => new JsonSerializerSettings
+{
+    ContractResolver = new CamelCasePropertyNamesContractResolver()
+};
 
 var app = builder.Build();
 
