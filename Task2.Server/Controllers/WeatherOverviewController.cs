@@ -63,14 +63,14 @@ namespace Task2.Server.Controllers
             public string country { get; set; }
         }
 
-        public class WeatherListViewModel
+        public class WeatherReportListViewModel
         {
-            public DateTime UtcNow { get; set; }
+            public string UtcNow { get; set; }
 
-            public IList<WeatherViewModel> WeatherList { get; set; } = new List<WeatherViewModel>();
+            public IList<WeatherReportViewModel> WeatherList { get; set; } = new List<WeatherReportViewModel>();
         }
 
-        public class WeatherViewModel
+        public class WeatherReportViewModel
         {
             public long CityId { get; set; }
 
@@ -93,14 +93,14 @@ namespace Task2.Server.Controllers
                     var weatherReports = await _weatherReportRepository.GetAllFromLastBatch();
 
                     var rnd = new Random();
-                    var vm = new WeatherListViewModel
+                    var vm = new WeatherReportListViewModel
                     {
-                        UtcNow = weatherReports.First().WeatherReportBatch.CreationDateTime
+                        UtcNow = weatherReports.First().WeatherReportBatch.CreationDateTime.ToString("HH:mm:ss")
                     };
 
                     foreach (var weatherReport in weatherReports)
                     {
-                        var wvm = new WeatherViewModel
+                        var wvm = new WeatherReportViewModel
                         {
                             CityId = weatherReport.CityId,
                             MinTemp = weatherReport.MinTemp,

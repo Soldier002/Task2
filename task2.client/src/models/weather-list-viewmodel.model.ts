@@ -1,10 +1,10 @@
-export interface WeatherListViewModel {
-    utcNow: Date,
-    weatherList: WeatherViewModel[]
+export interface WeatherReportListViewModel {
+    utcNow: string
+    weatherList: WeatherReportViewModel[]
 }
 
-interface WeatherViewModel {
-    cityId: number,
-    minTemp: number,
+export interface WeatherReportViewModel {
+    cityId: number
+    minTemp: number
     maxTemp: number
 }
