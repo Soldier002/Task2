@@ -26,8 +26,8 @@ namespace Services.Mappers
                 var weatherReport = new WeatherReport
                 {
                     CityId = w.id,
-                    MinTemp = (int)w.main.temp_min,
-                    MaxTemp = (int)w.main.temp_max,
+                    MinTemp = w.main.temp_min,
+                    MaxTemp = w.main.temp_max,
                 };
 
                 weatherReports.Add(weatherReport);

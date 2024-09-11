@@ -1,5 +1,6 @@
 using Domain.Persistence.Entities;
 using Domain.Persistence.Repositories;
+using Domain.WeatherOverviewApi.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -36,52 +37,8 @@ namespace Task2.Server.Controllers
             return cities;
         }
 
-        public class NotList
-        {
-            public Sys sys { get; set; }
-
-            public string name { get; set; }
-
-            public long id { get; set; }
-
-            public Main main { get; set; }
-        }
-
-        public class Main
-        {
-            public double temp_min { get; set; }
-            public double temp_max { get; set; }
-        }
-
-        public class Root
-        {
-            public List<NotList> list { get; set; }
-        }
-
-        public class Sys
-        {
-            public string country { get; set; }
-        }
-
-        public class WeatherReportListViewModel
-        {
-            public string UtcNow { get; set; }
-
-            public IList<WeatherReportViewModel> WeatherList { get; set; } = new List<WeatherReportViewModel>();
-        }
-
-        public class WeatherReportViewModel
-        {
-            public long CityId { get; set; }
-
-            public double MinTemp { get; set; }
-
-            public double MaxTemp { get; set; }
-        }
-
-
-        [HttpGet("testSse")]
-        public async Task<string> TestSse()
+        [HttpGet("weatherReportsSse")]
+        public async Task<string> WeatherReportsSse()
         {
             Response.Headers.Add("Content-Type", "text/event-stream");
             Response.Headers.Add("Cache-Control", "no-cache");

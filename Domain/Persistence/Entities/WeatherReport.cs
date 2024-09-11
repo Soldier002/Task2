@@ -10,9 +10,9 @@ namespace Domain.Persistence.Entities
     {
         public long Id { get; set; }
 
-        public int MinTemp { get; set; }
+        public double MinTemp { get; set; }
 
-        public int MaxTemp { get; set; }
+        public double MaxTemp { get; set; }
 
         public long CityId { get; set; }
 

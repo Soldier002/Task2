@@ -90,8 +90,8 @@ namespace Persistence.Repositories
             DataTable dataTable = new DataTable();
 
             dataTable.Columns.Add("Id", typeof(long));
-            dataTable.Columns.Add("MinTemp", typeof(int));
-            dataTable.Columns.Add("MaxTemp", typeof(int));
+            dataTable.Columns.Add("MinTemp", typeof(double));
+            dataTable.Columns.Add("MaxTemp", typeof(double));
             dataTable.Columns.Add("CityId", typeof(long));
             dataTable.Columns.Add("WeatherReportBatchId", typeof(long));
 
