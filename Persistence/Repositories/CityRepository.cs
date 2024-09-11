@@ -28,5 +28,16 @@ namespace Persistence.Repositories
             using var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnectionString"));
             await connection.ExecuteAsync(sql, city);
         }
+
+        public async Task<IList<City>> GetAll()
+        {
+            var sql = "SELECT * FROM Cities";
+
+            using (var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnectionString")))
+            {
+                var cities = await connection.QueryAsync<City>(sql);
+                return cities.ToList();
+            }
     }
+}
 }

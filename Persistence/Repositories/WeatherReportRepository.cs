@@ -44,11 +44,11 @@ namespace Persistence.Repositories
         {
             var dataTable = MapFrom(weatherReports);
 
-            using (var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnectionString")))
+            using var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnectionString"));
+            connection.Open();
+            using var transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted);
+            try
             {
-                //using var transaction = sourceConnection.BeginTransaction();
-
-                connection.Open();
                 var batchIdSql = @"
                     DECLARE @BatchIdTable TABLE (Id BIGINT)
                     DECLARE @BatchId BIGINT
@@ -62,7 +62,7 @@ namespace Persistence.Repositories
 
                     SELECT @BatchId;";
 
-                using var cmd = new SqlCommand(batchIdSql, connection);
+                using var cmd = new SqlCommand(batchIdSql, connection, transaction);
                 var batchId = (long)await cmd.ExecuteScalarAsync();
 
                 foreach (DataRow row in dataTable.Rows)
@@ -70,16 +70,16 @@ namespace Persistence.Repositories
                     row["WeatherReportBatchId"] = batchId;
                 }
 
-                using (var bulkCopy = new SqlBulkCopy(
-                           _configuration.GetConnectionString("DefaultConnectionString"), SqlBulkCopyOptions.CheckConstraints | SqlBulkCopyOptions.UseInternalTransaction))
-                {
-                    bulkCopy.BatchSize = weatherReports.Count();
-                    bulkCopy.DestinationTableName =
-                        "dbo.WeatherReports";
-
-                    bulkCopy.WriteToServer(dataTable);
-
-                };
+                using var bulkCopy = new SqlBulkCopy(connection, SqlBulkCopyOptions.CheckConstraints, transaction);
+                bulkCopy.BatchSize = weatherReports.Count();
+                bulkCopy.DestinationTableName = "dbo.WeatherReports";
+                bulkCopy.WriteToServer(dataTable);
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                transaction.Rollback();
+                throw;
             }
         }
 

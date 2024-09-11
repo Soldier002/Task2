@@ -2,7 +2,7 @@
 using Domain.Persistence.Repositories;
 using Newtonsoft.Json;
 using Quartz;
-using static Task2.Server.Controllers.WeatherForecastController;
+using static Task2.Server.Controllers.WeatherOverviewController;
 
 namespace Task2.Server.Jobs
 {
