@@ -6,14 +6,10 @@ using System.Threading.Tasks;
 
 namespace Domain.Persistence.Entities
 {
-    public class Weather
+    public class WeatherReportBatch
     {
         public long Id { get; set; }
 
-        public int MinTemp { get; set; }
-
-        public int MaxTemp { get; set; }
-
-        public long CityId { get; set; }
+        public DateTime CreationDateTime { get; set; }
     }
 }

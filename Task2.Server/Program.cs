@@ -1,5 +1,7 @@
+using Domain.Persistence.Repositories;
 using FluentMigrator.Runner;
 using Persistence.Migrations;
+using Persistence.Repositories;
 using Polly;
 using Quartz;
 using System.Reflection;
@@ -19,6 +21,7 @@ builder.Services.AddHttpClient("WeatherApi")
     .AddTransientHttpErrorPolicy(policyBuilder =>
         policyBuilder.WaitAndRetryAsync(3, retryNumber => TimeSpan.FromMilliseconds(1000)));
 builder.Services.AddSingleton<GetWeatherDataJob>();
+builder.Services.AddTransient<IWeatherReportRepository, WeatherReportRepository>();
 
 
 builder.Services.AddQuartz(q =>
@@ -33,6 +36,8 @@ builder.Services.AddQuartz(q =>
     );
 });
 builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+
+builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly());
 
 var configuration = new ConfigurationBuilder()
     .AddUserSecrets(Assembly.GetExecutingAssembly())
