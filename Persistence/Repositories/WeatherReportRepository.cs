@@ -27,7 +27,7 @@ namespace Persistence.Repositories
 					FROM WeatherReportBatches wrb
 					ORDER BY wrb.Id DESC)";
 
-            using var connection = new SqlConnection(_configuration["DefaultConnectionString"]);
+            using var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnectionString"));
             var result = await connection.QueryAsync<WeatherReport, WeatherReportBatch, WeatherReport>(
                 sql,
                 map: (weatherReport, weatherReportBatch) =>
@@ -44,7 +44,7 @@ namespace Persistence.Repositories
         {
             var dataTable = MapFrom(weatherReports);
 
-            using (var connection = new SqlConnection(_configuration["DefaultConnectionString"]))
+            using (var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnectionString")))
             {
                 //using var transaction = sourceConnection.BeginTransaction();
 
@@ -70,12 +70,10 @@ namespace Persistence.Repositories
                     row["WeatherReportBatchId"] = batchId;
                 }
 
-
-
                 using (var bulkCopy = new SqlBulkCopy(
-                           _configuration["DefaultConnectionString"], SqlBulkCopyOptions.CheckConstraints | SqlBulkCopyOptions.UseInternalTransaction))
+                           _configuration.GetConnectionString("DefaultConnectionString"), SqlBulkCopyOptions.CheckConstraints | SqlBulkCopyOptions.UseInternalTransaction))
                 {
-                    bulkCopy.BatchSize = sampleData.Count();
+                    bulkCopy.BatchSize = weatherReports.Count();
                     bulkCopy.DestinationTableName =
                         "dbo.WeatherReports";
 
@@ -84,24 +82,6 @@ namespace Persistence.Repositories
                 };
             }
         }
-        List<WeatherReport> sampleData = new List<WeatherReport> {
-                new WeatherReport {
-                    MinTemp = 10,
-                    MaxTemp = 20,
-                    CityId = 1337
-                },
-                new WeatherReport {
-                    MinTemp = 13,
-                    MaxTemp = 23,
-                    CityId = 1337
-                },
-                new WeatherReport {
-                    MinTemp = 17,
-                    MaxTemp = 27,
-                    CityId = 1337,
-                }
-            };
-
 
         private DataTable MapFrom(IEnumerable<WeatherReport> reports)
         {

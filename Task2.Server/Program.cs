@@ -20,14 +20,17 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient("WeatherApi")
     .AddTransientHttpErrorPolicy(policyBuilder =>
         policyBuilder.WaitAndRetryAsync(3, retryNumber => TimeSpan.FromMilliseconds(1000)));
-builder.Services.AddSingleton<GetWeatherDataJob>();
+builder.Services.AddTransient<GetWeatherDataJob>();
 builder.Services.AddTransient<IWeatherReportRepository, WeatherReportRepository>();
-
+builder.Services.AddTransient<ICityRepository, CityRepository>();
 
 builder.Services.AddQuartz(q =>
 {
-    var jobKey = new JobKey("GetWeatherDataJob");
-    q.AddJob<GetWeatherDataJob>(opts => opts.WithIdentity(jobKey));
+    var jobKey = new JobKey(nameof(GetWeatherDataJob));
+    q.AddJob<GetWeatherDataJob>(opts => opts
+        .WithIdentity(jobKey)
+        .StoreDurably()
+        .UsingJobData("initialized", false));
 
     q.AddTrigger(opts => opts
         .ForJob(jobKey)

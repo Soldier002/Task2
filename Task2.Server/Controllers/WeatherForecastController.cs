@@ -46,6 +46,8 @@ namespace Task2.Server.Controllers
 
             public string name { get; set; }
 
+            public long id { get; set; }
+
             public Main main { get; set; }
         }
 
