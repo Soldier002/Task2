@@ -40,7 +40,7 @@ namespace Persistence.Repositories
             return result.ToList();
         }
 
-        public async void InsertMany(IEnumerable<WeatherReport> weatherReports, DateTime creationDateTime)
+        public async Task InsertMany(IEnumerable<WeatherReport> weatherReports, DateTime creationDateTime, CancellationToken ct)
         {
             var dataTable = MapFrom(weatherReports);
 
@@ -63,7 +63,7 @@ namespace Persistence.Repositories
                     SELECT @BatchId;";
 
                 using var cmd = new SqlCommand(batchIdSql, connection, transaction);
-                var batchId = (long)await cmd.ExecuteScalarAsync();
+                var batchId = (long)await cmd.ExecuteScalarAsync(ct);
 
                 foreach (DataRow row in dataTable.Rows)
                 {
@@ -73,7 +73,8 @@ namespace Persistence.Repositories
                 using var bulkCopy = new SqlBulkCopy(connection, SqlBulkCopyOptions.CheckConstraints, transaction);
                 bulkCopy.BatchSize = weatherReports.Count();
                 bulkCopy.DestinationTableName = "dbo.WeatherReports";
-                bulkCopy.WriteToServer(dataTable);
+                ct.ThrowIfCancellationRequested();
+                await bulkCopy.WriteToServerAsync(dataTable, ct);
                 await transaction.CommitAsync();
             }
             catch (Exception)

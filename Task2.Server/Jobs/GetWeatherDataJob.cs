@@ -1,8 +1,10 @@
-﻿using Domain.Persistence.Entities;
+﻿using Domain.Integration.Models;
+using Domain.Persistence.Entities;
 using Domain.Persistence.Repositories;
+using Domain.Services.Services;
 using Newtonsoft.Json;
 using Quartz;
-using static Task2.Server.Controllers.WeatherOverviewController;
+using Services.Services;
 
 namespace Task2.Server.Jobs
 {
@@ -10,58 +12,16 @@ namespace Task2.Server.Jobs
     [DisallowConcurrentExecution]
     public class GetWeatherDataJob : IJob
     {
-        private readonly HttpClient _httpClient;
-        private readonly IWeatherReportRepository _weatherReportRepository;
-        private readonly ICityRepository _cityRepository;
+        private readonly IGetWeatherDataService _getWeatherDataService;
 
-        public GetWeatherDataJob(IHttpClientFactory httpClientFactory, IWeatherReportRepository weatherReportRepository, ICityRepository cityRepository)
+        public GetWeatherDataJob(IGetWeatherDataService getWeatherDataService)
         {
-            _httpClient = httpClientFactory.CreateClient("WeatherApi");
-            _weatherReportRepository = weatherReportRepository;
-            _cityRepository = cityRepository;
+            _getWeatherDataService = getWeatherDataService;
         }
 
         public async Task Execute(IJobExecutionContext context)
         {
-            var dataMap = context.JobDetail.JobDataMap;
-            var initialized = dataMap.GetBoolean("initialized");
-
-            var result = await _httpClient.GetAsync("https://api.openweathermap.org/data/2.5/group?id=2643743,3333169,6167865,6094817,361058,360630&appid=faa625de9ce05a0abdf9cf5850ca5637&units=metric");
-
-            var apiWeatherWeatherReports = JsonConvert.DeserializeObject<Root>(await result.Content.ReadAsStringAsync());
-
-            if (!initialized)
-            {
-                foreach (var w in apiWeatherWeatherReports.list)
-                {
-                    var city = new City
-                    {
-                        Id = w.id,
-                        Name = w.name,
-                        Country = w.sys.country
-                    };
-
-                    await _cityRepository.InsertIfNotExists(city);
-                }
-
-                dataMap.Put("initialized", true);
-            }
-
-            var weatherReports = new List<WeatherReport>();
-
-            foreach (var w in apiWeatherWeatherReports.list)
-            {
-                var weatherReport = new WeatherReport
-                {
-                    CityId = w.id,
-                    MinTemp = (int) w.main.temp_min,
-                    MaxTemp = (int) w.main.temp_max,
-                };
-
-                weatherReports.Add(weatherReport);
-            }
-
-            _weatherReportRepository.InsertMany(weatherReports, context.FireTimeUtc.UtcDateTime);
+            await _getWeatherDataService.Execute(context.JobDetail.JobDataMap, context.FireTimeUtc.DateTime, context.CancellationToken);
         }
     }
 }

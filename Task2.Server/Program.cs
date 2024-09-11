@@ -1,28 +1,37 @@
+using Common.Configuration;
+using Domain.Common.Configuration;
+using Domain.Integration.ApiClients;
 using Domain.Persistence.Repositories;
+using Domain.Services.Mappers;
+using Domain.Services.Services;
 using FluentMigrator.Runner;
+using Integration.ApiClients;
 using Persistence.Migrations;
 using Persistence.Repositories;
 using Polly;
 using Quartz;
+using Services.Mappers;
+using Services.Services;
 using System.Reflection;
 using Task2.Server.Jobs;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
-
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddHttpClient("WeatherApi")
+builder.Services.AddHttpClient(CommonStrings.WeatherApi)
     .AddTransientHttpErrorPolicy(policyBuilder =>
         policyBuilder.WaitAndRetryAsync(3, retryNumber => TimeSpan.FromMilliseconds(1000)));
+
 builder.Services.AddTransient<GetWeatherDataJob>();
 builder.Services.AddTransient<IWeatherReportRepository, WeatherReportRepository>();
 builder.Services.AddTransient<ICityRepository, CityRepository>();
+builder.Services.AddTransient<IWeatherOverviewConfiguration, WeatherOverviewConfiguration>();
+builder.Services.AddTransient<IOpenWeatherMapApiClient, OpenWeatherMapApiClient>();
+builder.Services.AddTransient<IOpenWeatherMapApiResponseMapper, OpenWeatherMapApiResponseMapper>();
+builder.Services.AddTransient<IGetWeatherDataService, GetWeatherDataService>();
 
 builder.Services.AddQuartz(q =>
 {
@@ -34,13 +43,14 @@ builder.Services.AddQuartz(q =>
 
     q.AddTrigger(opts => opts
         .ForJob(jobKey)
-        .WithIdentity("GetWeatherDataJob-trigger")
+        .WithIdentity($"{nameof(GetWeatherDataJob)}-trigger")
         .WithCronSchedule("0/5 * * ? * * *")
     );
 });
 builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
-builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly());
+builder.Configuration
+    .AddUserSecrets(Assembly.GetExecutingAssembly());
 
 var configuration = new ConfigurationBuilder()
     .AddUserSecrets(Assembly.GetExecutingAssembly())
@@ -58,7 +68,6 @@ var app = builder.Build();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
