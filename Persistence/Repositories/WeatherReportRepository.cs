@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using Domain.Common.Configuration;
 using Domain.Persistence.Entities;
+using Domain.Persistence.Mappers;
 using Domain.Persistence.Repositories;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
@@ -41,10 +42,8 @@ namespace Persistence.Repositories
             return result.ToList();
         }
 
-        public async Task InsertMany(IEnumerable<WeatherReport> weatherReports, DateTime creationDateTime, CancellationToken ct)
+        public async Task InsertMany(DataTable weatherReports, DateTime creationDateTime, CancellationToken ct)
         {
-            var dataTable = MapFrom(weatherReports);
-
             using var connection = new SqlConnection(_configuration.DefaultConnectionString);
             connection.Open();
             using var transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted);
@@ -56,7 +55,7 @@ namespace Persistence.Repositories
 
                     INSERT INTO WeatherReportBatches 
                     OUTPUT INSERTED.Id INTO @BatchIdTable
-                    VALUES (GETUTCDATE())
+                    VALUES (@CreationDateTime)
 
                     SELECT TOP 1 @BatchId = Id
                     FROM @BatchIdTable
@@ -64,18 +63,19 @@ namespace Persistence.Repositories
                     SELECT @BatchId;";
 
                 using var cmd = new SqlCommand(batchIdSql, connection, transaction);
+                cmd.Parameters.Add("@CreationDateTime", SqlDbType.DateTime).Value = creationDateTime;
                 var batchId = (long)await cmd.ExecuteScalarAsync(ct);
 
-                foreach (DataRow row in dataTable.Rows)
+                foreach (DataRow row in weatherReports.Rows)
                 {
                     row["WeatherReportBatchId"] = batchId;
                 }
 
                 using var bulkCopy = new SqlBulkCopy(connection, SqlBulkCopyOptions.CheckConstraints, transaction);
-                bulkCopy.BatchSize = weatherReports.Count();
+                bulkCopy.BatchSize = weatherReports.Rows.Count;
                 bulkCopy.DestinationTableName = "dbo.WeatherReports";
                 ct.ThrowIfCancellationRequested();
-                await bulkCopy.WriteToServerAsync(dataTable, ct);
+                await bulkCopy.WriteToServerAsync(weatherReports, ct);
                 await transaction.CommitAsync();
             }
             catch (Exception)
@@ -83,28 +83,6 @@ namespace Persistence.Repositories
                 transaction.Rollback();
                 throw;
             }
-        }
-
-        private DataTable MapFrom(IEnumerable<WeatherReport> reports)
-        {
-            DataTable dataTable = new DataTable();
-
-            dataTable.Columns.Add("Id", typeof(long));
-            dataTable.Columns.Add("MinTemp", typeof(double));
-            dataTable.Columns.Add("MaxTemp", typeof(double));
-            dataTable.Columns.Add("CityId", typeof(long));
-            dataTable.Columns.Add("WeatherReportBatchId", typeof(long));
-
-            foreach (var report in reports)
-            {
-                DataRow row = dataTable.NewRow();
-                row["MinTemp"] = report.MinTemp;
-                row["MaxTemp"] = report.MaxTemp;
-                row["CityId"] = report.CityId;
-                dataTable.Rows.Add(row);
-            }
-
-            return dataTable;
         }
     }
 }

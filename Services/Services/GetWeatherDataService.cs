@@ -1,4 +1,5 @@
 ﻿using Domain.Integration.ApiClients;
+using Domain.Persistence.Mappers;
 using Domain.Persistence.Repositories;
 using Domain.Services.Mappers;
 using Domain.Services.Services;
@@ -12,13 +13,15 @@ namespace Services.Services
         private readonly IWeatherReportRepository _weatherReportRepository;
         private readonly ICityRepository _cityRepository;
         private readonly IOpenWeatherMapApiResponseMapper _openWeatherMapApiResponseMapper;
+        private readonly IWeatherReportMapper _weatherReportMapper;
 
-        public GetWeatherDataService(IOpenWeatherMapApiClient openWeatherMapApiClient, IWeatherReportRepository weatherReportRepository, ICityRepository cityRepository, IOpenWeatherMapApiResponseMapper openWeatherMapApiResponseMapper)
+        public GetWeatherDataService(IOpenWeatherMapApiClient openWeatherMapApiClient, IWeatherReportRepository weatherReportRepository, ICityRepository cityRepository, IOpenWeatherMapApiResponseMapper openWeatherMapApiResponseMapper, IWeatherReportMapper weatherReportMapper)
         {
             _openWeatherMapApiClient = openWeatherMapApiClient;
             _weatherReportRepository = weatherReportRepository;
             _cityRepository = cityRepository;
             _openWeatherMapApiResponseMapper = openWeatherMapApiResponseMapper;
+            _weatherReportMapper = weatherReportMapper;
         }
 
         public async Task Execute(JobDataMap jobDataMap, DateTime executionDateTime, CancellationToken ct)
@@ -33,14 +36,15 @@ namespace Services.Services
                 foreach (var w in openWeatherMapApiResponse.list)
                 {
                     var city = _openWeatherMapApiResponseMapper.ToCity(w);
-                    await _cityRepository.InsertIfNotExists(city);
+                    await _cityRepository.InsertIfNotExists(city, ct);
                 }
 
                 jobDataMap.Put(nameof(initialized), true);
             }
 
             var weatherReports = _openWeatherMapApiResponseMapper.ToWeatherReports(openWeatherMapApiResponse);
-            await _weatherReportRepository.InsertMany(weatherReports, executionDateTime, ct);
+            var weatherReportDataTable = _weatherReportMapper.ToDataTable(weatherReports);
+            await _weatherReportRepository.InsertMany(weatherReportDataTable, executionDateTime, ct);
         }
     }
 }

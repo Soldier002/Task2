@@ -16,7 +16,7 @@ namespace Persistence.Repositories
             _configuration = configuration;
         }
 
-        public async Task InsertIfNotExists(City city)
+        public async Task InsertIfNotExists(City city, CancellationToken ct)
         {
             var sql = @"
                 MERGE INTO Cities AS Target
@@ -27,6 +27,7 @@ namespace Persistence.Repositories
                     VALUES (Source.Id, Source.Name, Source.Country);";
 
             using var connection = new SqlConnection(_configuration.DefaultConnectionString);
+            ct.ThrowIfCancellationRequested();
             await connection.ExecuteAsync(sql, city);
         }
 

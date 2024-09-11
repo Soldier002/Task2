@@ -4,7 +4,7 @@ namespace Domain.Persistence.Repositories
 {
     public interface ICityRepository
     {
-        Task InsertIfNotExists(City city);
+        Task InsertIfNotExists(City city, CancellationToken ct);
 
         Task<IList<City>> GetAll();
     }

@@ -1,11 +1,13 @@
 using Common.Configuration;
 using Domain.Common.Configuration;
 using Domain.Integration.ApiClients;
+using Domain.Persistence.Mappers;
 using Domain.Persistence.Repositories;
 using Domain.Services.Mappers;
 using Domain.Services.Services;
 using FluentMigrator.Runner;
 using Integration.ApiClients;
+using Persistence.Mappers;
 using Persistence.Migrations;
 using Persistence.Repositories;
 using Polly;
@@ -32,6 +34,7 @@ builder.Services.AddTransient<IWeatherOverviewConfiguration, WeatherOverviewConf
 builder.Services.AddTransient<IOpenWeatherMapApiClient, OpenWeatherMapApiClient>();
 builder.Services.AddTransient<IOpenWeatherMapApiResponseMapper, OpenWeatherMapApiResponseMapper>();
 builder.Services.AddTransient<IGetWeatherDataService, GetWeatherDataService>();
+builder.Services.AddTransient<IWeatherReportMapper, WeatherReportMapper>();
 
 builder.Services.AddQuartz(q =>
 {
