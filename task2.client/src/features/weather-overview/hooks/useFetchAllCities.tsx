@@ -1,11 +1,14 @@
-import { useState, useEffect } from "react";
+import { useEffect, Dispatch, SetStateAction } from "react";
 import { getAllCities } from '../../../services/citiesApiClient'
+import { WeatherOverviewData } from '../../../models/weather-overview-data.model'
+import { City } from '../../../models/city.model'
+import { TempChartData } from '../../../models/temp-chart-data.model'
 
-export const useFetchAllCities = (setWeatherOverviewData) => {
+export const useFetchAllCities = (setWeatherOverviewData: Dispatch<SetStateAction<WeatherOverviewData>>) => {
     useEffect(() => {
         const fetchData = async () => {
-            const cities = await getAllCities()
-            const minTempChartData = {
+            const cities: City[] = await getAllCities()
+            const minTempChartData: TempChartData = {
                 labels: [],
                 datasets: cities.map(c => {
                     const colorHex = '#' + Math.floor(Math.random() * 16777215).toString(16)
@@ -17,7 +20,7 @@ export const useFetchAllCities = (setWeatherOverviewData) => {
                         backgroundColor: colorHex,
                         borderWidth: 2
                     }
-                })
+                }) 
             }
             const maxTempChartData = {
                 ...minTempChartData,
@@ -29,7 +32,7 @@ export const useFetchAllCities = (setWeatherOverviewData) => {
                 maxTempChartData
             }
 
-            setWeatherOverviewData((c) => weatherOverviewData)
+            setWeatherOverviewData(() => weatherOverviewData)
         }
         fetchData().catch(console.error)
     }, [])

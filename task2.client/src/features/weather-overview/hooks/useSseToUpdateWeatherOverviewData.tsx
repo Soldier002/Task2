@@ -1,12 +1,15 @@
-import { useEffect } from 'react'
+import { useEffect, Dispatch, SetStateAction } from 'react'
 import { weatherOverviewApi, weatherSseEndpoint } from '../../../services/endpoints'
+import { WeatherOverviewData } from '../../../models/weather-overview-data.model'
+import { TempChartData } from '../../../models/temp-chart-data.model'
+import { WeatherListViewModel } from '../../../models/weather-list-viewmodel.model'
 
-export const useSseToUpdateWeatherOverviewData = (isInitialized, setWeatherOverviewData) => {
+export const useSseToUpdateWeatherOverviewData = (isInitialized: boolean, setWeatherOverviewData: Dispatch<SetStateAction<WeatherOverviewData>>) => {
     useEffect(() => {
         if (!isInitialized)
             return
 
-        function updateChartsWith(nextWeather, prevChartData, minOrMaxTempGetterFunction) {
+        function updateChartsWith(nextWeather: WeatherListViewModel, prevChartData: TempChartData, minOrMaxTempGetterFunction: (weatherViewModel: WeatherViewModel) => number) {
             const nextChartData = { ...prevChartData }
 
             nextChartData.labels = [...prevChartData.labels, nextWeather.utcNow]
