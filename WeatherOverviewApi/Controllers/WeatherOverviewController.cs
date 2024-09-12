@@ -33,15 +33,16 @@ namespace WeatherOverviewApi.Controllers
             Response.Headers.Add("Content-Type", "text/event-stream");
             Response.Headers.Add("Cache-Control", "no-cache");
             Response.Headers.Add("Connection", "keep-alive");
-            while (true)
+            var periodicTimer = new PeriodicTimer(TimeSpan.FromSeconds(5));
+
+            do
             {
+                var dateTime = DateTime.UtcNow;
                 var weatherReportListViewModel = await _weatherOverviewService.ExecuteWeatherReportsSse(ct);
 
                 await Response.WriteAsync("data: " + JsonConvert.SerializeObject(weatherReportListViewModel) + "\n\n", ct);
                 await Response.Body.FlushAsync(ct);
-
-                await Task.Delay(5000, ct);
-            }
+            } while (await periodicTimer.WaitForNextTickAsync(ct));
         }
     }
 }

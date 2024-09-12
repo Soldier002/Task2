@@ -13,15 +13,31 @@ namespace WeatherOverviewApi.Jobs
     public class GetWeatherDataJob : IJob
     {
         private readonly IGetWeatherDataService _getWeatherDataService;
+        private readonly ILogger<GetWeatherDataJob> _logger;
 
-        public GetWeatherDataJob(IGetWeatherDataService getWeatherDataService)
+        public GetWeatherDataJob(IGetWeatherDataService getWeatherDataService, ILogger<GetWeatherDataJob> logger)
         {
             _getWeatherDataService = getWeatherDataService;
+            _logger = logger;
         }
 
         public async Task Execute(IJobExecutionContext context)
         {
-            await _getWeatherDataService.Execute(context.JobDetail.JobDataMap, context.FireTimeUtc.DateTime, context.CancellationToken);
+            try
+            {
+                await _getWeatherDataService.Execute(context.JobDetail.JobDataMap, context.FireTimeUtc.DateTime, context.CancellationToken);
+            } 
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error: {ex.Message}");
+                
+                var jobEx = new JobExecutionException(ex)
+                {
+                    RefireImmediately = false
+                };
+
+                throw jobEx;
+            }
         }
     }
 }
