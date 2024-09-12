@@ -9,7 +9,6 @@ namespace Integration.ApiClients
     public class OpenWeatherMapApiClient : IOpenWeatherMapApiClient
     {
         private readonly HttpClient _httpClient;
-        private readonly string _weatherApiUrl = "https://api.openweathermap.org/data/2.5/weather?q=London&appid=";
         private readonly IWeatherOverviewConfiguration _configuration;
 
         public OpenWeatherMapApiClient(IHttpClientFactory httpClientFactory, IWeatherOverviewConfiguration configuration)
