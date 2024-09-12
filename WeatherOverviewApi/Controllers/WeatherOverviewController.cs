@@ -33,7 +33,7 @@ namespace WeatherOverviewApi.Controllers
             Response.Headers.Add("Content-Type", "text/event-stream");
             Response.Headers.Add("Cache-Control", "no-cache");
             Response.Headers.Add("Connection", "keep-alive");
-            var periodicTimer = new PeriodicTimer(TimeSpan.FromSeconds(5));
+            var periodicTimer = new PeriodicTimer(TimeSpan.FromMinutes(1));
 
             do
             {

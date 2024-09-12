@@ -51,7 +51,7 @@ builder.Services.AddQuartz(q =>
     q.AddTrigger(opts => opts
         .ForJob(jobKey)
         .WithIdentity($"{nameof(GetWeatherDataJob)}-trigger")
-        .WithCronSchedule("0/5 * * ? * * *")
+        .WithCronSchedule("0 * * ? * *")
     );
 });
 builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
